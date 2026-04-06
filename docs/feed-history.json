@@ -1,1 +1,14 @@
-[]
+[
+  {
+    "title": "New Debian Developers and Maintainers (January and February 2026)",
+    "link": "https://bits.debian.org/2026/03/new-developers-2026-03.html",
+    "published": "2026-03-27T23:00:00+01:00",
+    "published_iso": "2026-03-27T22:00:00+00:00"
+  },
+  {
+    "title": "Debian pt_BR localization team and UFABC's mentoring program",
+    "link": "https://bits.debian.org/2026/03/debian-pt-BR-and-ufabc-mentoring-program.html",
+    "published": "2026-03-18T17:45:00+01:00",
+    "published_iso": "2026-03-18T16:45:00+00:00"
+  }
+]
