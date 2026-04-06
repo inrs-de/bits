@@ -32,7 +32,7 @@ BEIJING_TZ = ZoneInfo("Asia/Shanghai")
 UTC8_LABEL = "UTC+8"
 USER_AGENT = "bits-debian-newsletter/1.0 (+https://github.com/)"
 
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-live-preview")
+GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite-preview")
 MAILEROO_API_URL = os.getenv("MAILEROO_API_URL", "https://smtp.maileroo.com/send")
 
 
@@ -900,30 +900,110 @@ def send_maileroo_email(
     html_body: str,
     text_body: str,
 ) -> None:
-    payload = {
-        "from": {
-            "address": email_from,
-            "name": "Newsletter",
-        },
-        "to": [{"address": addr} for addr in recipients],
-        "subject": subject,
-        "html": html_body,
-        "text": text_body,
-    }
+    sender_addr = extract_email_address(email_from)
+    recipients = [extract_email_address(x) for x in recipients if extract_email_address(x)]
+
+    if not sender_addr:
+        raise RuntimeError("EMAIL_FROM is invalid.")
+    if not recipients:
+        raise RuntimeError("EMAIL_TO is invalid or empty.")
+
+    recipients_csv = ",".join(recipients)
+    sender_with_name = f"Newsletter <{sender_addr}>"
+
+    attempts = [
+        (
+            "json-flat-from_name",
+            "json",
+            {
+                "from": sender_addr,
+                "from_name": "Newsletter",
+                "to": recipients_csv,
+                "subject": subject,
+                "html": html_body,
+                "text": text_body,
+                "plain": text_body,
+            },
+        ),
+        (
+            "json-flat-formatted-from",
+            "json",
+            {
+                "from": sender_with_name,
+                "to": recipients_csv,
+                "subject": subject,
+                "html": html_body,
+                "text": text_body,
+                "plain": text_body,
+            },
+        ),
+        (
+            "json-array-to",
+            "json",
+            {
+                "from": sender_addr,
+                "from_name": "Newsletter",
+                "to": recipients,
+                "subject": subject,
+                "html": html_body,
+                "text": text_body,
+                "plain": text_body,
+            },
+        ),
+        (
+            "form-flat",
+            "form",
+            {
+                "from": sender_addr,
+                "from_name": "Newsletter",
+                "to": recipients_csv,
+                "subject": subject,
+                "html": html_body,
+                "text": text_body,
+                "plain": text_body,
+            },
+        ),
+    ]
 
     print(f"Sending email to {len(recipients)} recipient(s)...")
-    resp = requests.post(
-        MAILEROO_API_URL,
-        headers={
-            "Content-Type": "application/json",
-            "X-API-Key": api_key,
-            "User-Agent": USER_AGENT,
-        },
-        json=payload,
-        timeout=60,
-    )
-    ensure_http_ok(resp, "Maileroo")
-    print("Email sent successfully.")
+
+    last_error: Exception | None = None
+
+    for attempt_name, mode, payload in attempts:
+        try:
+            headers = {
+                "X-API-Key": api_key,
+                "User-Agent": USER_AGENT,
+            }
+
+            if mode == "json":
+                headers["Content-Type"] = "application/json"
+                resp = requests.post(
+                    MAILEROO_API_URL,
+                    headers=headers,
+                    json=payload,
+                    timeout=60,
+                )
+            else:
+                resp = requests.post(
+                    MAILEROO_API_URL,
+                    headers=headers,
+                    data=payload,
+                    timeout=60,
+                )
+
+            if resp.ok:
+                print(f"Email sent successfully via Maileroo ({attempt_name}).")
+                return
+
+            print(f"Maileroo attempt failed ({attempt_name}): HTTP {resp.status_code} {resp.text}")
+            last_error = RuntimeError(f"Maileroo HTTP {resp.status_code}: {resp.text}")
+
+        except Exception as exc:
+            print(f"Maileroo exception on attempt {attempt_name}: {exc}")
+            last_error = exc
+
+    raise RuntimeError(f"All Maileroo send attempts failed. Last error: {last_error}")
 
 
 def main() -> None:
