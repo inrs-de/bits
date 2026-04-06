@@ -837,15 +837,15 @@ def build_email_html(posts: list[dict[str, Any]], include_translation: bool, upd
           <tr>
             <td class="px-20 py-24" style="padding:28px 24px; background-color:#0F172A; background-image:linear-gradient(135deg, #0F172A 0%, #1E293B 100%);">
               <div style="margin:0; font-size:26px; line-height:1.3; font-weight:700; color:#FFFFFF;">🐧 Bits from Debian</div>
-              <div style="margin-top:8px; font-size:13px; line-height:1.7; color:#CBD5E1;">
-                Latest 2 posts from bits.debian.org
+              <div style="margin-top:8px; font-size:16px; line-height:1.7; color:#CBD5E1;">
+                HAVE FUN ~ ~
               </div>
             </td>
           </tr>
 
           <tr>
             <td class="px-20" style="padding:20px 24px 4px 24px; font-size:14px; line-height:1.7; color:#475569;">
-              This email contains the latest 2 entries from the Debian newsletter feed.
+              Latest 2 posts from bits.debian.org.
             </td>
           </tr>
 
@@ -906,34 +906,27 @@ def send_maileroo_email(
     html_body: str,
     text_body: str,
 ) -> None:
-    sender_addr = extract_email_address(email_from)
-    recipients = [extract_email_address(x) for x in recipients if extract_email_address(x)]
+    _, sender_addr = parseaddr((email_from or "").strip())
+    sender_addr = sender_addr.strip() or (email_from or "").strip()
+
+    normalized_recipients = []
+    for item in recipients:
+        _, addr = parseaddr((item or "").strip())
+        addr = addr.strip() or (item or "").strip()
+        if addr:
+            normalized_recipients.append(addr)
 
     if not sender_addr:
         raise RuntimeError("EMAIL_FROM is invalid.")
-    if not recipients:
+    if not normalized_recipients:
         raise RuntimeError("EMAIL_TO is invalid or empty.")
 
-    recipients_csv = ",".join(recipients)
+    recipients_csv = ",".join(normalized_recipients)
     sender_with_name = f"Newsletter <{sender_addr}>"
 
     attempts = [
         (
-            "json-flat-from_name",
-            "json",
-            {
-                "from": sender_addr,
-                "from_name": "Newsletter",
-                "to": recipients_csv,
-                "subject": subject,
-                "html": html_body,
-                "text": text_body,
-                "plain": text_body,
-            },
-        ),
-        (
-            "json-flat-formatted-from",
-            "json",
+            "form-formatted-from",
             {
                 "from": sender_with_name,
                 "to": recipients_csv,
@@ -944,21 +937,7 @@ def send_maileroo_email(
             },
         ),
         (
-            "json-array-to",
-            "json",
-            {
-                "from": sender_addr,
-                "from_name": "Newsletter",
-                "to": recipients,
-                "subject": subject,
-                "html": html_body,
-                "text": text_body,
-                "plain": text_body,
-            },
-        ),
-        (
-            "form-flat",
-            "form",
+            "form-from-name",
             {
                 "from": sender_addr,
                 "from_name": "Newsletter",
@@ -969,34 +948,35 @@ def send_maileroo_email(
                 "plain": text_body,
             },
         ),
+        (
+            "form-name",
+            {
+                "from": sender_addr,
+                "name": "Newsletter",
+                "to": recipients_csv,
+                "subject": subject,
+                "html": html_body,
+                "text": text_body,
+                "plain": text_body,
+            },
+        ),
     ]
 
-    print(f"Sending email to {len(recipients)} recipient(s)...")
+    print(f"Sending email to {len(normalized_recipients)} recipient(s)...")
 
     last_error: Exception | None = None
 
-    for attempt_name, mode, payload in attempts:
+    for attempt_name, payload in attempts:
         try:
-            headers = {
-                "X-API-Key": api_key,
-                "User-Agent": USER_AGENT,
-            }
-
-            if mode == "json":
-                headers["Content-Type"] = "application/json"
-                resp = requests.post(
-                    MAILEROO_API_URL,
-                    headers=headers,
-                    json=payload,
-                    timeout=60,
-                )
-            else:
-                resp = requests.post(
-                    MAILEROO_API_URL,
-                    headers=headers,
-                    data=payload,
-                    timeout=60,
-                )
+            resp = requests.post(
+                MAILEROO_API_URL,
+                headers={
+                    "X-API-Key": api_key,
+                    "User-Agent": USER_AGENT,
+                },
+                data=payload,
+                timeout=60,
+            )
 
             if resp.ok:
                 print(f"Email sent successfully via Maileroo ({attempt_name}).")
