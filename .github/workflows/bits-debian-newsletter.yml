@@ -35,7 +35,7 @@ jobs:
           MAILEROO_API_KEY: ${{ secrets.MAILEROO_API_KEY }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
-          GEMINI_MODEL: gemini-3.1-flash-live-preview
+          GEMINI_MODEL: gemini-3.1-flash-lite-preview
           PYTHONUTF8: "1"
         run: python scripts/run.py
 
