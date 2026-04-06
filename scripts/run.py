@@ -9,7 +9,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 from urllib.parse import urljoin
-
+from email.utils import parseaddr
 import feedparser
 import requests
 from bs4 import BeautifulSoup, NavigableString, Tag
@@ -64,6 +64,12 @@ def require_env(name: str) -> str:
     if not value:
         raise RuntimeError(f"Missing required environment variable: {name}")
     return value
+
+
+def extract_email_address(value: str) -> str:
+    value = (value or "").strip()
+    _, addr = parseaddr(value)
+    return addr.strip() if addr else value
 
 
 def parse_recipients(raw: str) -> list[str]:
