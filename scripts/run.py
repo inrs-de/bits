@@ -859,7 +859,7 @@ def build_email_html(posts: list[dict[str, Any]], include_translation: bool, upd
 
           <tr>
             <td class="shell-pad" style="padding:18px 18px 4px 18px; font-size:14px; line-height:1.7; color:#475569;">
-              Latest 2 posts from bits.debian.org.
+              Latest 2 posts from bits.debian.org
             </td>
           </tr>
 
