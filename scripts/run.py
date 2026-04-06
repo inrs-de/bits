@@ -740,9 +740,9 @@ def article_card_html(post: dict[str, Any], include_translation: bool) -> str:
     chinese_block = ""
     if include_translation and translated_html:
         chinese_block = f"""
-        <div style="margin-top:14px; padding:14px 16px; background:#F3F4F6; border-radius:12px;">
-          <div style="margin:0 0 10px 0; font-size:13px; font-weight:700; color:#374151;">🤖中文翻译</div>
-          <div style="color:#374151; font-size:14px !important; line-height:1.6 !important; word-break:break-word;">
+        <div class="lang-pad" style="margin-top:12px; padding:14px 14px; background:#F3F4F6; border-radius:12px;">
+          <div style="margin:0 0 8px 0; font-size:13px; font-weight:700; color:#374151;">🤖中文翻译</div>
+          <div style="color:#374151; font-size:14px !important; line-height:1.6 !important; word-break:break-word; overflow-wrap:anywhere;">
             {translated_html}
           </div>
         </div>
@@ -750,25 +750,25 @@ def article_card_html(post: dict[str, Any], include_translation: bool) -> str:
 
     return f"""
     <tr>
-      <td class="px-20" style="padding:0 24px 20px 24px;">
+      <td class="card-wrap" style="padding:0 18px 16px 18px;">
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; border:1px solid #E5E7EB; border-radius:16px; background:#FFFFFF;">
           <tr>
-            <td style="padding:20px;">
+            <td class="card-pad" style="padding:20px 20px;">
               <div style="margin:0 0 8px 0; font-size:22px; line-height:1.4; font-weight:700; color:#0F172A;">
                 <a href="{link_attr}" style="color:#0F172A; text-decoration:none;">{title}</a>
               </div>
 
               <div style="margin:0 0 8px 0; font-size:12px; line-height:1.6; color:#6B7280;">
-                Published: {published}
+                📅Published: {published}
               </div>
 
-              <div style="margin:0 0 16px 0; font-size:13px; line-height:1.6; color:#2563EB; word-break:break-word;">
-                <a href="{link_attr}" style="color:#2563EB; text-decoration:underline; word-break:break-word;">{link_text}</a>
+              <div style="margin:0 0 14px 0; font-size:13px; line-height:1.6; color:#2563EB; word-break:break-word; overflow-wrap:anywhere;">
+                <a href="{link_attr}" style="color:#2563EB; text-decoration:underline; word-break:break-word; overflow-wrap:anywhere;">{link_text}</a>
               </div>
 
-              <div style="padding:14px 16px; background:#F9FAFB; border-radius:12px;">
-                <div style="margin:0 0 10px 0; font-size:13px; font-weight:700; color:#111827;">📄ENGLISH</div>
-                <div style="color:#111827; font-size:14px !important; line-height:1.6 !important; word-break:break-word;">
+              <div class="lang-pad" style="padding:14px 14px; background:#F9FAFB; border-radius:12px;">
+                <div style="margin:0 0 8px 0; font-size:13px; font-weight:700; color:#111827;">📖ENGLISH</div>
+                <div style="color:#111827; font-size:14px !important; line-height:1.6 !important; word-break:break-word; overflow-wrap:anywhere;">
                   {english_html}
                 </div>
               </div>
@@ -810,17 +810,31 @@ def build_email_html(posts: list[dict[str, Any]], include_translation: bool, upd
     a {{
       text-decoration: underline;
     }}
+
     @media only screen and (max-width: 600px) {{
       .container {{
         width: 100% !important;
       }}
-      .px-20 {{
-        padding-left: 16px !important;
-        padding-right: 16px !important;
+      .outer-pad {{
+        padding: 10px 6px !important;
       }}
-      .py-24 {{
-        padding-top: 20px !important;
-        padding-bottom: 20px !important;
+      .shell-pad {{
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+      }}
+      .hero-pad {{
+        padding: 22px 18px !important;
+      }}
+      .card-wrap {{
+        padding-left: 12px !important;
+        padding-right: 12px !important;
+        padding-bottom: 14px !important;
+      }}
+      .card-pad {{
+        padding: 18px 18px !important;
+      }}
+      .lang-pad {{
+        padding: 14px 14px !important;
       }}
     }}
   </style>
@@ -832,27 +846,27 @@ def build_email_html(posts: list[dict[str, Any]], include_translation: bool, upd
 
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="width:100%; background:#F3F4F6;">
     <tr>
-      <td align="center" style="padding:24px 12px;">
-        <table role="presentation" width="680" cellpadding="0" cellspacing="0" border="0" class="container" style="width:100%; max-width:680px; background:#FFFFFF; border-radius:18px; overflow:hidden;">
+      <td align="center" class="outer-pad" style="padding:16px 10px;">
+        <table role="presentation" width="700" cellpadding="0" cellspacing="0" border="0" class="container" style="width:100%; max-width:700px; background:#FFFFFF; border-radius:18px; overflow:hidden;">
           <tr>
-            <td class="px-20 py-24" style="padding:28px 24px; background-color:#0F172A; background-image:linear-gradient(135deg, #0F172A 0%, #1E293B 100%);">
+            <td class="shell-pad hero-pad" style="padding:26px 22px; background-color:#0F172A; background-image:linear-gradient(135deg, #0F172A 0%, #1E293B 100%);">
               <div style="margin:0; font-size:26px; line-height:1.3; font-weight:700; color:#FFFFFF;">🐧 Bits from Debian</div>
-              <div style="margin-top:8px; font-size:16px; line-height:1.7; color:#CBD5E1;">
-                HAVE FUN ~ ~
+              <div style="margin-top:8px; font-size:13px; line-height:1.7; color:#CBD5E1;">
+                Latest 2 posts from bits.debian.org
               </div>
             </td>
           </tr>
 
           <tr>
-            <td class="px-20" style="padding:20px 24px 4px 24px; font-size:14px; line-height:1.7; color:#475569;">
-              Latest 2 posts from bits.debian.org.
+            <td class="shell-pad" style="padding:18px 18px 4px 18px; font-size:14px; line-height:1.7; color:#475569;">
+              This email contains the latest 2 entries from the Debian newsletter feed.
             </td>
           </tr>
 
           {cards_html}
 
           <tr>
-            <td class="px-20 py-24" style="padding:20px 24px; text-align:center; background-color:#0F172A; background-image:linear-gradient(135deg, #1E293B 0%, #0F172A 100%);">
+            <td class="shell-pad" style="padding:18px 18px 18px 18px; text-align:center; background-color:#0F172A; background-image:linear-gradient(135deg, #1E293B 0%, #0F172A 100%);">
               <div style="font-size:13px; line-height:1.7; color:#CBD5E1; text-align:center;">
                 Updated at {updated_at_bj.strftime("%Y-%m-%d %H:%M")} {UTC8_LABEL}
               </div>
