@@ -851,15 +851,15 @@ def build_email_html(posts: list[dict[str, Any]], include_translation: bool, upd
           <tr>
             <td class="shell-pad hero-pad" style="padding:26px 22px; background-color:#0F172A; background-image:linear-gradient(135deg, #0F172A 0%, #1E293B 100%);">
               <div style="margin:0; font-size:26px; line-height:1.3; font-weight:700; color:#FFFFFF;">🐧 Bits from Debian</div>
-              <div style="margin-top:8px; font-size:13px; line-height:1.7; color:#CBD5E1;">
-                Latest 2 posts from bits.debian.org
+              <div style="margin-top:8px; font-size:16px; line-height:1.7; color:#CBD5E1;">
+                HAVE FUN ~
               </div>
             </td>
           </tr>
 
           <tr>
             <td class="shell-pad" style="padding:18px 18px 4px 18px; font-size:14px; line-height:1.7; color:#475569;">
-              This email contains the latest 2 entries from the Debian newsletter feed.
+              Latest 2 posts from bits.debian.org.
             </td>
           </tr>
 
