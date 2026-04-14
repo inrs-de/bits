@@ -32,7 +32,9 @@ BEIJING_TZ = ZoneInfo("Asia/Shanghai")
 UTC8_LABEL = "UTC+8"
 USER_AGENT = "bits-debian-newsletter/1.0 (+https://github.com/)"
 
-GEMINI_MODEL = os.getenv("GEMINI_MODEL", "gemini-3.1-flash-lite-preview")
+# 修改为 OpenRouter 配置
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "z-ai/glm-4.5-air:free")
+OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 MAILEROO_API_URL = os.getenv("MAILEROO_API_URL", "https://smtp.maileroo.com/send")
 
 
@@ -427,43 +429,45 @@ def validate_preserved_assets(original_html: str, translated_html: str) -> None:
             raise ValueError(f"Missing img src after translation: {src}")
 
 
-def call_gemini(prompt: str, api_key: str) -> str:
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{GEMINI_MODEL}:generateContent?key={api_key}"
+def call_openrouter(prompt: str, api_key: str) -> str:
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json",
+        "User-Agent": USER_AGENT,
+        # OpenRouter 建议添加这些头部以便追踪
+        "HTTP-Referer": "https://github.com/", 
+        "X-Title": "bits-debian-newsletter"
+    }
+
     payload = {
-        "contents": [
+        "model": OPENROUTER_MODEL,
+        "messages": [
             {
                 "role": "user",
-                "parts": [{"text": prompt}],
+                "content": prompt
             }
         ],
-        "generationConfig": {
-            "temperature": 0.2,
-        },
+        "temperature": 0.2,
     }
 
     resp = requests.post(
-        url,
-        headers={
-            "Content-Type": "application/json",
-            "User-Agent": USER_AGENT,
-        },
+        OPENROUTER_API_URL,
+        headers=headers,
         json=payload,
         timeout=180,
     )
-    ensure_http_ok(resp, "Gemini")
+    ensure_http_ok(resp, "OpenRouter")
 
     data = resp.json()
-    texts: list[str] = []
-    for candidate in data.get("candidates", []):
-        content = candidate.get("content", {})
-        for part in content.get("parts", []):
-            if "text" in part and part["text"]:
-                texts.append(part["text"])
-
-    result = "\n".join(texts).strip()
-    if not result:
-        raise RuntimeError(f"Gemini returned empty result: {json.dumps(data, ensure_ascii=False)[:1200]}")
-    return result
+    
+    # 解析 OpenAI 格式的响应
+    try:
+        content = data["choices"][0]["message"]["content"]
+        if not content:
+            raise RuntimeError(f"OpenRouter returned empty content: {json.dumps(data, ensure_ascii=False)[:1200]}")
+        return content.strip()
+    except (KeyError, IndexError) as e:
+        raise RuntimeError(f"Failed to parse OpenRouter response: {json.dumps(data, ensure_ascii=False)[:1200]}") from e
 
 
 def translate_segment_once(segment_html: str, api_key: str) -> str:
@@ -487,7 +491,7 @@ Strict requirements:
 HTML:
 {segment_html}
 """
-    translated = call_gemini(prompt, api_key)
+    translated = call_openrouter(prompt, api_key)
     translated = strip_markdown_fences(translated)
     validate_preserved_assets(segment_html, translated)
     return sanitize_html(translated, SITE_BASE)
@@ -1010,7 +1014,9 @@ def main() -> None:
     maileroo_api_key = require_env("MAILEROO_API_KEY")
     email_to = require_env("EMAIL_TO")
     email_from = require_env("EMAIL_FROM")
-    gemini_api_key = os.getenv("GEMINI_API_KEY", "").strip()
+    
+    # 修改为读取 OpenRouter API Key
+    openrouter_api_key = os.getenv("OPENROUTER_API_KEY", "").strip()
 
     recipients = parse_recipients(email_to)
     beijing_now = now_beijing()
@@ -1018,10 +1024,10 @@ def main() -> None:
     posts = fetch_latest_posts()
 
     include_translation = False
-    if gemini_api_key:
+    if openrouter_api_key:
         try:
             for post in posts:
-                post["translated_html"] = translate_article_html(post["content_html"], gemini_api_key)
+                post["translated_html"] = translate_article_html(post["content_html"], openrouter_api_key)
             include_translation = True
             print("All translations completed.")
         except Exception as exc:
@@ -1030,7 +1036,7 @@ def main() -> None:
             for post in posts:
                 post["translated_html"] = ""
     else:
-        print("GEMINI_API_KEY is not set, sending English-only email.")
+        print("OPENROUTER_API_KEY is not set, sending English-only email.")
         for post in posts:
             post["translated_html"] = ""
 
