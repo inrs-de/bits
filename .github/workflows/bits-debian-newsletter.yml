@@ -31,11 +31,11 @@ jobs:
 
       - name: Run newsletter script
         env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
           MAILEROO_API_KEY: ${{ secrets.MAILEROO_API_KEY }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
-          GEMINI_MODEL: gemini-3.1-flash-lite-preview
+          OPENROUTER_MODEL: z-ai/glm-4.5-air:free
           PYTHONUTF8: "1"
         run: python scripts/run.py
 
