@@ -26,14 +26,14 @@ INDEX_FILE = DOCS_DIR / "index.html"
 MAX_HISTORY = 6
 TRANSLATE_THRESHOLD = 6000
 TRANSLATE_SEGMENT_SIZE = 5500
-TRANSLATE_RETRY_TIMES = 3
+TRANSLATE_RETRY_TIMES = 6
 
 BEIJING_TZ = ZoneInfo("Asia/Shanghai")
 UTC8_LABEL = "UTC+8"
 USER_AGENT = "bits-debian-newsletter/1.0 (+https://github.com/)"
 
 # 修改为 OpenRouter 配置
-OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "z-ai/glm-4.5-air:free")
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "openrouter/free")
 OPENROUTER_API_URL = "https://openrouter.ai/api/v1/chat/completions"
 MAILEROO_API_URL = os.getenv("MAILEROO_API_URL", "https://smtp.maileroo.com/send")
 
@@ -434,7 +434,6 @@ def call_openrouter(prompt: str, api_key: str) -> str:
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
         "User-Agent": USER_AGENT,
-        # OpenRouter 建议添加这些头部以便追踪
         "HTTP-Referer": "https://github.com/", 
         "X-Title": "bits-debian-newsletter"
     }
@@ -460,7 +459,6 @@ def call_openrouter(prompt: str, api_key: str) -> str:
 
     data = resp.json()
     
-    # 解析 OpenAI 格式的响应
     try:
         content = data["choices"][0]["message"]["content"]
         if not content:
@@ -508,7 +506,7 @@ def translate_segment_with_retry(segment_html: str, api_key: str) -> str:
             last_error = exc
             print(f"Segment translation failed: {exc}")
             if attempt < TRANSLATE_RETRY_TIMES:
-                time.sleep(2 ** attempt)
+                time.sleep(12 ** attempt)
 
     raise RuntimeError(f"Segment translation failed after retries: {last_error}")
 
