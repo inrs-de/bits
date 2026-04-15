@@ -2,7 +2,7 @@ name: Bits from Debian Newsletter
 
 on:
   schedule:
-    - cron: "26 11 * * 2-6"
+    - cron: "26 10 * * 6"
   workflow_dispatch:
 
 concurrency:
@@ -35,7 +35,7 @@ jobs:
           MAILEROO_API_KEY: ${{ secrets.MAILEROO_API_KEY }}
           EMAIL_TO: ${{ secrets.EMAIL_TO }}
           EMAIL_FROM: ${{ secrets.EMAIL_FROM }}
-          OPENROUTER_MODEL: z-ai/glm-4.5-air:free
+          OPENROUTER_MODEL: openrouter/free
           PYTHONUTF8: "1"
         run: python scripts/run.py
 
