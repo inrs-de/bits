@@ -1,5 +1,11 @@
 [
   {
+    "title": "New Debian Developers and Maintainers (July and August 2026)",
+    "link": "https://bits.debian.org/2026/09/new-developers-2026-09.html",
+    "published": "2026-09-07T23:00:00+02:00",
+    "published_iso": "2026-09-07T21:00:00+00:00"
+  },
+  {
     "title": "Debian turns 33!",
     "link": "https://bits.debian.org/2026/08/debian-turns-33.html",
     "published": "2026-08-16T15:00:00+02:00",
@@ -28,11 +34,5 @@
     "link": "https://bits.debian.org/2026/07/debconf26-welcomes-sponsors.html",
     "published": "2026-07-18T14:00:00+02:00",
     "published_iso": "2026-07-18T12:00:00+00:00"
-  },
-  {
-    "title": "New Debian Developers and Maintainers (May and June 2026)",
-    "link": "https://bits.debian.org/2026/07/new-developers-2026-07.html",
-    "published": "2026-07-10T09:00:00+02:00",
-    "published_iso": "2026-07-10T07:00:00+00:00"
   }
 ]
